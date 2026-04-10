@@ -49,7 +49,7 @@ export const RewardsDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Scanner className="lg:col-span-2 glass-panel p-8 border-midnight-cyan/30 bg-midnight-cyan/5 relative overflow-hidden">
+        <Scanner active={isClaiming} className="lg:col-span-2 glass-panel p-8 border-midnight-cyan/30 bg-midnight-cyan/5 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Trophy size={120} />
           </div>

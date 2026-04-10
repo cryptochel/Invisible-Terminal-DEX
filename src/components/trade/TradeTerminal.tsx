@@ -1,14 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, Activity, Database, Cpu, ArrowRight, Shield, Zap } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { toast } from 'sonner';
 import { ANALYTICS_DATA } from '../../constants';
-import { cn, Scanner, TerminalText, PrivacyShield } from '../ui';
+import { cn, Scanner, TerminalText, PrivacyShield, ShieldedValue } from '../ui';
+import { useStore } from '../../store';
 
 export const TradeTerminal = () => {
+  const { isConnected, addTransaction, tokens } = useStore();
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderType, setOrderType] = useState<'Buy' | 'Sell'>('Buy');
+  const [price, setPrice] = useState('2449.95');
+  const [size, setSize] = useState('');
+
+  const ethToken = tokens.find(t => t.id === 'eth') || tokens[1];
+  const usdcToken = tokens.find(t => t.id === 'usdc') || tokens[2];
+
+  const handlePlaceOrder = () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+    if (!size || parseFloat(size) <= 0) {
+      toast.error('Please enter a valid order size');
+      return;
+    }
+
+    setIsOrdering(true);
+    toast.info(`Initializing Shielded ${orderType} Order...`, {
+      description: 'Generating ZK-proof for limit order execution',
+      duration: 2000,
+    });
+
+    setTimeout(() => {
+      setIsOrdering(false);
+      
+      const newTx = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: 'Trade' as any,
+        pair: `ETH / USDC (${orderType})`,
+        amount: `${size} ETH @ ${price}`,
+        status: 'Completed' as const,
+        proof: `zk_tr_${Math.random().toString(16).substr(2, 8)}`,
+        date: 'Just now'
+      };
+      
+      addTransaction(newTx);
+      toast.success('Order Placed Successfully', {
+        description: `Limit order added to shielded book: ${newTx.proof}`,
+      });
+      setSize('');
+    }, 3000);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-mono">
       <div className="lg:col-span-2 space-y-6">
-        <Scanner className="glass-panel p-6 h-[500px] flex flex-col border-midnight-cyan/20">
+        <Scanner active={isOrdering} className="glass-panel p-6 h-[500px] flex flex-col border-midnight-cyan/20">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="flex -space-x-2">
@@ -92,33 +140,93 @@ export const TradeTerminal = () => {
       </div>
 
       <div className="space-y-6">
-        <Scanner className="glass-panel p-6 border-midnight-cyan/20">
+        <Scanner active={isOrdering} className="glass-panel p-6 border-midnight-cyan/20">
           <div className="flex gap-2 p-1 bg-midnight-bg/60 border border-midnight-border mb-6">
-            <button className="flex-1 py-2 bg-midnight-cyan/10 text-midnight-cyan border border-midnight-cyan/30 text-[10px] font-bold uppercase tracking-widest">Buy</button>
-            <button className="flex-1 py-2 text-midnight-muted hover:text-midnight-text text-[10px] font-bold uppercase tracking-widest">Sell</button>
+            <button 
+              onClick={() => setOrderType('Buy')}
+              className={cn(
+                "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all",
+                orderType === 'Buy' ? "bg-midnight-cyan/10 text-midnight-cyan border border-midnight-cyan/30" : "text-midnight-muted hover:text-midnight-text"
+              )}
+            >
+              Buy
+            </button>
+            <button 
+              onClick={() => setOrderType('Sell')}
+              className={cn(
+                "flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all",
+                orderType === 'Sell' ? "bg-rose-500/10 text-rose-500 border border-rose-500/30" : "text-midnight-muted hover:text-midnight-text"
+              )}
+            >
+              Sell
+            </button>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] text-midnight-muted font-bold uppercase tracking-widest block mb-2">Limit_Price</label>
+              <div className="flex justify-between mb-2">
+                <label className="text-[10px] text-midnight-muted font-bold uppercase tracking-widest block">Limit_Price</label>
+                <div className="flex items-center gap-1">
+                  <span className="text-[8px] text-midnight-muted uppercase tracking-widest">Bal:</span>
+                  <ShieldedValue 
+                    value={usdcToken.balance} 
+                    suffix=" USDC" 
+                    className={cn("text-[8px]", orderType === 'Buy' && "text-midnight-cyan")} 
+                  />
+                </div>
+              </div>
               <div className="relative">
-                <input type="text" value="2449.95" className="w-full bg-midnight-bg/40 border border-midnight-border py-3 px-4 focus:border-midnight-cyan focus:ring-0 font-mono text-sm text-midnight-text" />
+                <input 
+                  type="text" 
+                  value={price} 
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full bg-midnight-bg/40 border border-midnight-border py-3 px-4 focus:border-midnight-cyan focus:ring-0 font-mono text-sm text-midnight-text" 
+                />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-midnight-muted font-bold">USDC</span>
               </div>
             </div>
             <div>
-              <label className="text-[10px] text-midnight-muted font-bold uppercase tracking-widest block mb-2">Order_Size</label>
+              <div className="flex justify-between mb-2">
+                <label className="text-[10px] text-midnight-muted font-bold uppercase tracking-widest block">Order_Size</label>
+                <div className="flex items-center gap-1">
+                  <span className="text-[8px] text-midnight-muted uppercase tracking-widest">Bal:</span>
+                  <ShieldedValue 
+                    value={ethToken.balance} 
+                    suffix=" ETH" 
+                    className={cn("text-[8px]", orderType === 'Sell' && "text-rose-500")} 
+                  />
+                </div>
+              </div>
               <div className="relative">
-                <input type="text" placeholder="0.0000" className="w-full bg-midnight-bg/40 border border-midnight-border py-3 px-4 focus:border-midnight-cyan focus:ring-0 font-mono text-sm text-midnight-text" />
+                <input 
+                  type="text" 
+                  placeholder="0.0000" 
+                  value={size}
+                  onChange={(e) => setSize(e.target.value)}
+                  className="w-full bg-midnight-bg/40 border border-midnight-border py-3 px-4 focus:border-midnight-cyan focus:ring-0 font-mono text-sm text-midnight-text" 
+                />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-midnight-muted font-bold">ETH</span>
               </div>
             </div>
             <div className="pt-4">
               <div className="flex justify-between text-[10px] font-bold uppercase mb-4 tracking-widest">
                 <span className="text-midnight-muted">Est_Total:</span>
-                <span className="text-midnight-cyan">0.00 USDC</span>
+                <span className="text-midnight-cyan">
+                  {size && price ? (parseFloat(size) * parseFloat(price)).toFixed(2) : '0.00'} USDC
+                </span>
               </div>
-              <button className="terminal-button w-full py-4 bg-midnight-cyan/10 text-midnight-cyan border border-midnight-cyan/30 font-bold uppercase tracking-[0.2em] hover:bg-midnight-cyan hover:text-midnight-bg">
-                Place_Buy_Order
+              <button 
+                onClick={handlePlaceOrder}
+                disabled={isOrdering}
+                className={cn(
+                  "terminal-button w-full py-4 font-bold uppercase tracking-[0.2em] transition-all",
+                  isOrdering 
+                    ? "bg-midnight-border text-midnight-muted cursor-not-allowed" 
+                    : orderType === 'Buy' 
+                      ? "bg-midnight-cyan/10 text-midnight-cyan border border-midnight-cyan/30 hover:bg-midnight-cyan hover:text-midnight-bg"
+                      : "bg-rose-500/10 text-rose-500 border border-rose-500/30 hover:bg-rose-500 hover:text-midnight-bg"
+                )}
+              >
+                {isOrdering ? <TerminalText text="EXECUTING..." speed={30} /> : `Place_${orderType}_Order`}
               </button>
             </div>
           </div>

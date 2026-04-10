@@ -15,7 +15,7 @@ export const ShieldedValue = ({ value, prefix = '', suffix = '', className = '' 
   const handleReveal = () => {
     if (isRevealed) return;
     setIsRevealed(true);
-    setTimer(30);
+    setTimer(60);
   };
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export const ShieldedValue = ({ value, prefix = '', suffix = '', className = '' 
   );
 };
 
-export const Scanner = ({ children, active = true, className = "" }: { children: React.ReactNode, active?: boolean, className?: string }) => (
+export const Scanner = ({ children, active = false, className = "" }: { children: React.ReactNode, active?: boolean, className?: string }) => (
   <div className={cn("relative overflow-hidden", className)}>
     {active && <div className="scanner-line" />}
     {children}

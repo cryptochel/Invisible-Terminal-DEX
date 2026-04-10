@@ -30,7 +30,7 @@ export const AgentsDashboard = () => {
 
   return (
     <div className="space-y-8 font-mono">
-      <Scanner className="glass-panel p-10 relative overflow-hidden border-midnight-cyan/20">
+      <Scanner active={isClaiming} className="glass-panel p-10 relative overflow-hidden border-midnight-cyan/20">
         <div className="absolute top-0 right-0 w-64 h-64 bg-midnight-cyan/5 blur-[80px] rounded-full -mr-32 -mt-32" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
