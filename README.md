@@ -1,11 +1,43 @@
-<div align="center">
+# Invisible DEX MVP
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A privacy-focused decentralized exchange built for the Midnight ecosystem.
 
-  <h1>Built with AI Studio</h2>
+## Tech Stack
+- **Frontend:** React + Vite (Simulating Next.js structure)
+- **Styling:** TailwindCSS
+- **Animations:** Framer Motion (motion/react)
+- **State Management:** Zustand
+- **Web3:** Ethers.js
+- **Charts:** Recharts
+- **Notifications:** Sonner
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Features
+- **Shielded Swaps:** Zero-knowledge proof simulation for private trading.
+- **Privacy Modes:** Standard, Shielded, and Phantom modes.
+- **Liquidity Pools:** Private liquidity provision with APR tracking.
+- **Portfolio:** Shielded balance management and transaction history.
+- **Rewards:** INV token incentive system.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Getting Started
 
-</div>
+### Installation
+```bash
+npm install
+```
+
+### Development
+```bash
+npm run dev
+```
+
+### Build
+```bash
+npm run build
+```
+
+## Project Structure
+- `/src/components`: Reusable UI and feature-specific components.
+- `/src/store.ts`: Global state management with Zustand.
+- `/src/hooks`: Custom React hooks for Web3 and UI logic.
+- `/src/lib`: External library configurations.
+- `/src/utils`: Helper functions.
